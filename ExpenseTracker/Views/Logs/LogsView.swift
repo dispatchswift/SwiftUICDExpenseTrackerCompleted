@@ -22,6 +22,10 @@ struct LogsView: View {
 	
 	@State private var isAddFormPresented: Bool = false
     
+	init() {
+		UITableView.appearance().showsVerticalScrollIndicator = false
+	}
+	
 	var body: some View {
 		NavigationView {
 			VStack(spacing: 0) {

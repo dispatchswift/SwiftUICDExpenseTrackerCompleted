@@ -37,31 +37,30 @@ struct LogsListView: View {
 	}
 	
 	var body: some View {
-		ScrollView(showsIndicators: false) {
-			Group {
-				ForEach(fetchedLogs) { log in
-					LogsListRowView(log: log, logToEdit: $logToEdit)
-				}
-				.onDelete(perform: onDelete)
-				.sheet(
-					item: $logToEdit,
-					onDismiss: {
-						self.logToEdit = nil
-					}, content: { log in
-						LogFormView(
-							logToEdit: log,
-							context: self.context,
-							name: log.name ?? "",
-							amount: log.amount?.doubleValue ?? 0,
-							category: Category(rawValue: log.category ?? "") ?? .food,
-							date: log.date ?? Date(),
-							notes: log.notes ?? ""
-						)
-					}
-				)
+		List {
+			ForEach(fetchedLogs) { log in
+				LogsListRowView(log: log, logToEdit: $logToEdit)
 			}
-			.padding()
+			.onDelete(perform: onDelete)
+			.sheet(
+				item: $logToEdit,
+				onDismiss: {
+					self.logToEdit = nil
+				}, content: { log in
+					LogFormView(
+						logToEdit: log,
+						context: self.context,
+						name: log.name ?? "",
+						amount: log.amount?.doubleValue ?? 0,
+						category: Category(rawValue: log.category ?? "") ?? .food,
+						date: log.date ?? Date(),
+						notes: log.notes ?? ""
+					)
+				}
+			)
+			.hideListRowSeparator()
 		}
+		.listStyle(PlainListStyle())
 	}
 }
 
