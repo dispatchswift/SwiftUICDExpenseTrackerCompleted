@@ -18,7 +18,9 @@ extension String {
 
 extension Double {
 	func formattedCurrencyText(_ type: CurrencyType) -> String {
-		let formatter = Utils.numberFormatter
+		let formatter = NumberFormatter()
+		formatter.isLenient = true
+		formatter.numberStyle = .currency
 		formatter.currencyCode = type.rawValue.uppercased()
 		
 		return formatter.string(from: NSNumber(value: self)) ?? "0"
