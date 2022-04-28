@@ -2,18 +2,14 @@
 //  DashboardView.swift
 //  ExpenseTracker
 //
-//  Created by Alfian Losari on 19/04/20.
-//  Copyright © 2020 Alfian Losari. All rights reserved.
+//  Copyright © 2022 Amari Duran. All rights reserved.
 //
 
 import SwiftUI
 import CoreData
 
 struct DashboardView: View {
-	@Environment(\.managedObjectContext) var context: NSManagedObjectContext
-	
-	@State private var expensesTotal: Double = 0.0
-	@State private var categories: [CategorySum] = []
+	@ObservedObject private var viewModel: DashboardViewModel
 	
 	@State private var currencyType: CurrencyType = .usd
 	@State private var previousCurrencyType: CurrencyType = .usd
@@ -21,14 +17,15 @@ struct DashboardView: View {
 	@State private var selectedCurrency: Currency = .usd
 	
 	@State private var showsCurrencySelectionView = false
-	@State private var isUpdatingCurrency = false
 	
-	private let service = APIService()
+	init(context: NSManagedObjectContext) {
+		viewModel = DashboardViewModel(context: context, service: APIService())
+	}
 	
 	var body: some View {
 		NavigationView {
 			ScrollView(showsIndicators: false) {
-				if !categories.isEmpty {
+				if !viewModel.categories.isEmpty {
 					VStack(spacing: 0) {
 						pieChartView
 						totalExpensesView
@@ -37,17 +34,14 @@ struct DashboardView: View {
 					}
 					.padding()
 				} else {
-					Text("No expenses data\nPlease add your expenses from the logs tab")
-						.font(.headline)
-						.multilineTextAlignment(.center)
-						.padding(.horizontal)
+					emptyDataView
 				}
 			}
 			.navigationBarTitle("", displayMode: .inline)
 			.navigationBarItems(trailing: currencySelectorBarItem)
 			.onAppear {
 				guard selectedCurrency.type == previousCurrencyType else { return }
-				updateTotalExpenses()
+				viewModel.updateTotalExpenses()
 			}
 		}
 	}
@@ -56,11 +50,18 @@ struct DashboardView: View {
 // MARK: - Views
 extension DashboardView {
 	
+	var emptyDataView: some View {
+		Text("No expenses data\nPlease add your expenses from the logs tab")
+			.font(.headline)
+			.multilineTextAlignment(.center)
+			.padding(.horizontal)
+	}
+	
 	var pieChartView: some View {
 		Group {
-			if expensesTotal > 0 {
+			if viewModel.expensesTotal > 0 {
 				PieChartView(
-					data: categories.map { ($0.sum, $0.category.color) },
+					data: viewModel.categories.map { ($0.sum, $0.category.color) },
 					style: Styles.pieChartStyleOne,
 					form: CGSize(width: 300, height: 240),
 					dropShadow: false
@@ -74,17 +75,17 @@ extension DashboardView {
 			Text("Total Expenses")
 				.font(.title)
 			
-			Text(expensesTotal.formattedCurrencyText(selectedCurrency.type))
+			Text(viewModel.expensesTotal.formattedCurrencyText(selectedCurrency.type))
 				.font(.title)
 				.fontWeight(.bold)
-				.foregroundColor(isUpdatingCurrency ? .secondary : .primary)
+				.foregroundColor(viewModel.isUpdatingCurrency ? .secondary : .primary)
 		}
 		.frame(maxWidth: .infinity, alignment: .leading)
 		.padding(.vertical)
 	}
 	
 	var categoriesListView: some View {
-		ForEach(categories) {
+		ForEach(viewModel.categories) {
 			CategoryRowView(category: $0.category, total: $0.sum)
 		}
 		.padding(.vertical, 4)
@@ -92,7 +93,7 @@ extension DashboardView {
 	
 	var currencySelectorBarItem: some View {
 		Group {
-			if !categories.isEmpty {
+			if !viewModel.categories.isEmpty {
 				Button {
 					showsCurrencySelectionView = true
 				} label: {
@@ -103,21 +104,21 @@ extension DashboardView {
 								.onDisappear {
 									guard selectedCurrency.type != previousCurrencyType else { return }
 									
-									self.isUpdatingCurrency = true
+									viewModel.isUpdatingCurrency = true
 									self.previousCurrencyType = selectedCurrency.type
 									
-									convertCurrency(amount: expensesTotal,
-																	toCurrency: selectedCurrency.type.rawValue.uppercased(),
-																	fromCurrency: previousCurrencyType.rawValue.uppercased())
+									viewModel.convertCurrency(amount: viewModel.expensesTotal,
+																						toCurrency: selectedCurrency.type.rawValue.uppercased(),
+																						fromCurrency: previousCurrencyType.rawValue.uppercased())
 								}
 						},
 						label: {
-							if isUpdatingCurrency {
+							if viewModel.isUpdatingCurrency {
 								if #available(iOS 14, *) {
 									ProgressView()
 										.padding(.all, 4)
 								} else {
-									ActivityIndicator(isAnimating: isUpdatingCurrency)
+									ActivityIndicator(isAnimating: viewModel.isUpdatingCurrency)
 								}
 							} else {
 								Image(systemName: selectedCurrency.imageName)
@@ -130,37 +131,6 @@ extension DashboardView {
 						}
 					)
 				}
-			}
-		}
-	}
-}
-
-// MARK: - Methods
-extension DashboardView {
-	
-	func updateTotalExpenses() {
-		ExpenseLog.fetchTotalExpenseOfAllCategories(context: self.context) { results in
-			guard !results.isEmpty else { return }
-			
-			self.expensesTotal = results.map { $0.sum }.reduce(0, +)
-			self.categories = results.map { CategorySum(sum: $0.sum, category: $0.category) }
-		}
-	}
-	
-	func convertCurrency(amount: Double, toCurrency: String, fromCurrency: String) {
-		service.updateCurrency(
-			amount: amount,
-			toCurrency: toCurrency,
-			fromCurrency: fromCurrency
-		) { result in
-			isUpdatingCurrency = false
-			
-			switch result {
-			case .success(let response):
-				expensesTotal = response.amount
-				
-			case .failure(let error):
-				debugPrint(error)
 			}
 		}
 	}

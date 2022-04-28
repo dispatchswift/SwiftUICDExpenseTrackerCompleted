@@ -7,11 +7,14 @@
 //
 
 import SwiftUI
-
+import CoreData
+ 
 struct ContentView: View {
+	@Environment(\.managedObjectContext) var context
+	
 	var body: some View {
 		TabView {
-			DashboardView()
+			DashboardView(context: context)
 				.tabItem {
 					VStack {
 						Image(systemName: "chart.pie")

@@ -13,6 +13,23 @@ enum APIError: Error {
 	case error(String?)
 }
 
+struct UpdateCurrencyPostModel: Encodable {
+	let amount: Double
+	let toCurrency: String
+	let fromCurrency: String
+	
+	enum CodingKeys: String, CodingKey {
+		case amount
+		case toCurrency = "to_currency"
+		case fromCurrency = "from_currency"
+	}
+}
+
+struct UpdateCurrencyResponseModel: Decodable {
+	let amount: Double
+	let rate: Double
+}
+
 protocol APIServiceProtocol {
 	func updateCurrency(amount: Double,
 											toCurrency: String,
