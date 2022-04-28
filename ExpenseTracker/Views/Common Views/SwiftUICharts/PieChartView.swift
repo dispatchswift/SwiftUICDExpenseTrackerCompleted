@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-
-
 public struct PieChartView : View {
     public var data: [(value: Double, color: Color)]
     
@@ -17,7 +15,10 @@ public struct PieChartView : View {
     public var formSize:CGSize
     public var dropShadow: Bool
 
-    public init(data: [(value: Double, color: Color)], style: ChartStyle = Styles.pieChartStyleOne, form: CGSize? = ChartForm.medium, dropShadow: Bool? = true){
+    public init(data: [(value: Double, color: Color)],
+								style: ChartStyle = Styles.pieChartStyleOne,
+								form: CGSize? = ChartForm.medium,
+								dropShadow: Bool? = true) {
         self.data = data
         self.style = style
         self.formSize = form!

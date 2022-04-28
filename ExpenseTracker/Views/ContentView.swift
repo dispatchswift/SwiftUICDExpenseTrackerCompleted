@@ -9,31 +9,34 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        TabView {
-            DashboardTabView()
-                .tabItem {
-                    VStack {
-                        Text("Dashboard")
-                        Image(systemName: "chart.pie")
-                    }
-            }
-            .tag(0)
-            
-            LogsTabView()
-                .tabItem {
-                    VStack {
-                        Text("Logs")
-                        Image(systemName: "tray")
-                    }
-            }
-            .tag(1)
-        }
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
+	var body: some View {
+		TabView {
+			DashboardView()
+				.tabItem {
+					VStack {
+						Image(systemName: "chart.pie")
+						Text("Dashboard")
+					}
+				}
+				.tag(0)
+			
+			LogsView()
+				.tabItem {
+					VStack {
+						Image(systemName: "tray")
+						Text("Logs")
+					}
+				}
+				.tag(1)
+			
+			MonthlySummaryView()
+				.tabItem {
+					VStack {
+						Image(systemName: "list.bullet.below.rectangle")
+						Text("Summary")
+					}
+				}
+				.tag(2)
+		}
+	}
 }

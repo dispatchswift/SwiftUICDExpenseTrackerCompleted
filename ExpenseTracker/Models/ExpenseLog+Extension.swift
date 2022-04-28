@@ -9,25 +9,25 @@
 import Foundation
 import CoreData
 
-extension ExpenseLog: Identifiable {
+extension ExpenseLog {
+	var categoryEnum: Category {
+		Category(rawValue: category ?? "") ?? .other
+	}
+	
+	var nameText: String {
+		name ?? ""
+	}
+	
+	var amountText: String {
+		Utils.numberFormatter.string(from: NSNumber(value: amount?.doubleValue ?? 0)) ?? ""
+	}
+	
+	var dateText: String {
+		Utils.dateFormatter.localizedString(for: date ?? Date(), relativeTo: Date())
+	}
     
-    var categoryEnum: Category {
-        Category(rawValue: category ?? "") ?? .other
-    }
-    
-    var dateText: String {
-        Utils.dateFormatter.localizedString(for: date ?? Date(), relativeTo: Date())
-    }
-    
-    var nameText: String {
-        name ?? ""
-    }
-    
-    var amountText: String {
-        Utils.numberFormatter.string(from: NSNumber(value: amount?.doubleValue ?? 0)) ?? ""
-    }
-    
-    static func fetchAllCategoriesTotalAmountSum(context: NSManagedObjectContext, completion: @escaping ([(sum: Double, category: Category)]) -> ()) {
+    static func fetchTotalExpenseOfAllCategories(context: NSManagedObjectContext,
+																								 completion: @escaping ([(sum: Double, category: Category)]) -> ()) {
         let keypathAmount = NSExpression(forKeyPath: \ExpenseLog.amount)
         let expression = NSExpression(forFunction: "sum:", arguments: [keypathAmount])
         

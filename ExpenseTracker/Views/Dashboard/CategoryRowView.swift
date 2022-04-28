@@ -2,28 +2,30 @@
 //  CategoryRowView.swift
 //  ExpenseTracker
 //
-//  Created by Alfian Losari on 19/04/20.
-//  Copyright © 2020 Alfian Losari. All rights reserved.
+//  Copyright © 2022 Amari Duran. All rights reserved.
 //
 
 import SwiftUI
 
 struct CategoryRowView: View {
-    let category: Category
-    let sum: Double
-    
-    var body: some View {
-        HStack {
-            CategoryImageView(category: category)
-            Text(category.rawValue.capitalized)
-            Spacer()
-            Text(sum.formattedCurrencyText).font(.headline)
-        }
-    }
-}
-
-struct CategoryRowView_Previews: PreviewProvider {
-    static var previews: some View {
-        CategoryRowView(category: .donation, sum: 2500)
-    }
+	let category: Category
+	let total: Double
+	
+	var body: some View {
+		HStack(spacing: 16) {
+			CategoryImageView(category: category)
+			
+			Text(category.rawValue.capitalized)
+			
+			Spacer()
+			
+			Text(total.formattedCurrencyText(.usd))
+				.font(.headline)
+		}
+		.padding()
+		.overlay(
+			RoundedRectangle(cornerRadius: 4)
+				.stroke(Color.black, lineWidth: 1)
+		)
+	}
 }
